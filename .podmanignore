@@ -1,0 +1,14 @@
+node_modules
+dist
+npm-debug.log
+.env
+.git
+.gitignore
+README.md
+ARCHITECTURE.md
+PODMAN_GUIDE.md
+QUICK_START.md
+*.md
+.DS_Store
+test-api.sh
+

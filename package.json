@@ -1,0 +1,46 @@
+{
+  "name": "community-ecommerce",
+  "version": "1.0.0",
+  "description": "E-commerce comunitário",
+  "main": "dist/index.js",
+  "scripts": {
+    "build": "tsc",
+    "start": "node dist/index.js",
+    "dev": "ts-node-dev --respawn --transpile-only src/index.ts",
+    "clean": "rm -rf dist",
+    "prebuild": "npm run clean",
+    "docker:build": "podman build -t community-ecommerce:latest .",
+    "docker:build-dev": "podman build -f Dockerfile.dev -t community-ecommerce:dev .",
+    "docker:run": "podman run -d --name community-ecommerce-api -p 3000:3000 community-ecommerce:latest",
+    "docker:dev": "podman run -d --name community-ecommerce-dev -p 3000:3000 -v $(pwd)/src:/app/src:Z community-ecommerce:dev",
+    "docker:stop": "podman stop community-ecommerce-api || podman stop community-ecommerce-dev",
+    "docker:remove": "podman rm community-ecommerce-api || podman rm community-ecommerce-dev",
+    "docker:logs": "podman logs -f community-ecommerce-api || podman logs -f community-ecommerce-dev",
+    "compose:up": "podman-compose up -d",
+    "compose:down": "podman-compose down",
+    "compose:logs": "podman-compose logs -f"
+  },
+  "keywords": [
+    "ecommerce",
+    "community",
+    "typescript",
+    "node"
+  ],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "@types/dotenv": "^6.1.1",
+    "@types/express": "^5.0.5",
+    "@types/node": "^20.19.25",
+    "ts-node": "^10.9.2",
+    "ts-node-dev": "^2.0.0",
+    "typescript": "^5.9.3"
+  },
+  "dependencies": {
+    "dotenv": "^16.6.1",
+    "express": "^5.1.0",
+    "mysql2": "^3.15.3",
+    "pg": "^8.16.3",
+    "sequelize": "^6.37.7"
+  }
+}
