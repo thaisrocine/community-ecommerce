@@ -1,5 +1,5 @@
 import { BaseRepository } from './BaseRepository'
-import { Order, OrderStatus } from '../entities/Order'
+import { Order, OrderStatus } from '../models/Order'
 
 export interface IOrderRepository {
   findByUserId(userId: string): Promise<Order[]>

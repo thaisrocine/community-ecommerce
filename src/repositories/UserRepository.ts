@@ -1,5 +1,5 @@
 import { BaseRepository } from './BaseRepository'
-import { User, UserRole } from '../entities/User'
+import { User, UserRole } from '../models/User'
 
 export interface IUserRepository {
   findByEmail(email: string): Promise<User | null>

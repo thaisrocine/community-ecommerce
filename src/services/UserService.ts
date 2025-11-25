@@ -1,5 +1,5 @@
 import { UserRepository } from '../repositories/UserRepository'
-import { User, UserRole, UserStatus } from '../entities/User'
+import { User, UserRole, UserStatus } from '../models/User'
 
 export class UserService {
   private userRepository: UserRepository

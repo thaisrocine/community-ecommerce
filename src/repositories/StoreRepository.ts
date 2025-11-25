@@ -1,5 +1,5 @@
 import { BaseRepository } from './BaseRepository'
-import { Store, StoreStatus } from '../entities/Store'
+import { Store, StoreStatus } from '../models/Store'
 
 export interface IStoreRepository {
   findByOwnerId(ownerId: string): Promise<Store[]>

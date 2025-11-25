@@ -1,5 +1,5 @@
 import { ProductService } from '../services/ProductService'
-import { Product } from '../entities/Product'
+import { Product } from '../models/Product'
 
 export interface CreateProductRequest {
   storeId: string

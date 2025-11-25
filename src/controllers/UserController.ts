@@ -1,5 +1,5 @@
 import { UserService } from '../services/UserService'
-import { User, UserRole } from '../entities/User'
+import { User, UserRole } from '../models/User'
 
 export interface CreateUserRequest {
   email: string

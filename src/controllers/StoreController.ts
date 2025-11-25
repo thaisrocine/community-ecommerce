@@ -1,5 +1,5 @@
 import { StoreService } from '../services/StoreService'
-import { Store } from '../entities/Store'
+import { Store } from '../models/Store'
 
 export interface CreateStoreRequest {
   ownerId: string
