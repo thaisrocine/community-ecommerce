@@ -1,5 +1,5 @@
 import { OrderService } from '../services/OrderService'
-import { Order, OrderItem, PaymentMethod } from '../entities/Order'
+import { Order, OrderItem, PaymentMethod } from '../models/Order'
 
 export interface CreateOrderRequest {
   userId: string

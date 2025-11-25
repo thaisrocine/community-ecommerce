@@ -1,6 +1,6 @@
 import { OrderRepository } from '../repositories/OrderRepository'
 import { ProductRepository } from '../repositories/ProductRepository'
-import { Order, OrderStatus } from '../entities/Order'
+import { Order, OrderStatus } from '../models/Order'
 
 export class OrderService {
   private orderRepository: OrderRepository

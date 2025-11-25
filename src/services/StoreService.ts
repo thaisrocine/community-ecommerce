@@ -1,5 +1,5 @@
 import { StoreRepository } from '../repositories/StoreRepository'
-import { Store, StoreStatus } from '../entities/Store'
+import { Store, StoreStatus } from '../models/Store'
 
 export class StoreService {
   private storeRepository: StoreRepository
