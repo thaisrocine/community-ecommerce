@@ -22,8 +22,6 @@ export class UserService {
       ...data,
       status: data.status || UserStatus.ACTIVE,
       role: data.role || UserRole.CLIENT,
-      createdAt: new Date(),
-      updatedAt: new Date(),
     }
 
     return await this.userRepository.create(userData)
@@ -48,7 +46,6 @@ export class UserService {
 
     const updatedData = {
       ...data,
-      updatedAt: new Date(),
     }
 
     return await this.userRepository.update(id, updatedData)
