@@ -1,5 +1,5 @@
-import { BaseRepository } from './BaseRepository'
 import { Order, OrderStatus } from '../models/Order'
+import { OrderModel } from '../database'
 
 export interface IOrderRepository {
   findByUserId(userId: string): Promise<Order[]>
@@ -8,27 +8,63 @@ export interface IOrderRepository {
   findByStatus(status: OrderStatus): Promise<Order[]>
 }
 
-export class OrderRepository
-  extends BaseRepository<Order>
-  implements IOrderRepository
-{
-  constructor() {
-    super('orders')
+export class OrderRepository implements IOrderRepository {
+  async findById(id: string): Promise<Order | null> {
+    const result = await OrderModel.findByPk(id)
+    return result ? (result.toJSON() as Order) : null
   }
 
-  async findByUserId(_userId: string): Promise<Order[]> {
-    throw new Error('Method not implemented - connect database first')
+  async findAll(filters?: Record<string, any>): Promise<Order[]> {
+    const results = await OrderModel.findAll({ where: filters })
+    return results.map((result) => result.toJSON() as Order)
   }
 
-  async findByStoreId(_storeId: string): Promise<Order[]> {
-    throw new Error('Method not implemented - connect database first')
+  async create(data: Partial<Order>): Promise<Order> {
+    const result = await OrderModel.create(data as any)
+    return result.toJSON() as Order
   }
 
-  async findByOrderNumber(_orderNumber: string): Promise<Order | null> {
-    throw new Error('Method not implemented - connect database first')
+  async update(id: string, data: Partial<Order>): Promise<Order | null> {
+    const [affectedCount] = await OrderModel.update(data as any, {
+      where: { id } as any,
+    })
+    if (affectedCount === 0) return null
+    return this.findById(id)
   }
 
-  async findByStatus(_status: OrderStatus): Promise<Order[]> {
-    throw new Error('Method not implemented - connect database first')
+  async delete(id: string): Promise<boolean> {
+    const affectedCount = await OrderModel.destroy({ where: { id } as any })
+    return affectedCount > 0
+  }
+
+  async findByUserId(userId: string): Promise<Order[]> {
+    const results = await OrderModel.findAll({
+      where: { userId } as any,
+      order: [['createdAt', 'DESC']],
+    })
+    return results.map((result) => result.toJSON() as Order)
+  }
+
+  async findByStoreId(storeId: string): Promise<Order[]> {
+    const results = await OrderModel.findAll({
+      where: { storeId } as any,
+      order: [['createdAt', 'DESC']],
+    })
+    return results.map((result) => result.toJSON() as Order)
+  }
+
+  async findByOrderNumber(orderNumber: string): Promise<Order | null> {
+    const result = await OrderModel.findOne({
+      where: { orderNumber } as any,
+    })
+    return result ? (result.toJSON() as Order) : null
+  }
+
+  async findByStatus(status: OrderStatus): Promise<Order[]> {
+    const results = await OrderModel.findAll({
+      where: { status } as any,
+      order: [['createdAt', 'DESC']],
+    })
+    return results.map((result) => result.toJSON() as Order)
   }
 }
