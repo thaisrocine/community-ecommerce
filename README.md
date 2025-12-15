@@ -1,176 +1,271 @@
 # Community E-commerce
 
-Repositório do projeto de e-commerce comunitário desenvolvido com Node.js e TypeScript.
+API de e-commerce comunitario desenvolvida com Node.js, Express e TypeScript. O sistema permite a criacao e gerenciamento de lojas virtuais, cadastro de produtos, processamento de pedidos e gestao de usuarios.
 
-## 🚀 Tecnologias
+## Tecnologias
 
-- Node.js
+- Node.js (v20+)
 - TypeScript
-- Express
-- Sequelize (ORM)
-- PostgreSQL / MySQL
-- Podman (containerização)
-- dotenv (gerenciamento de variáveis de ambiente)
+- Express 5
+- Sequelize ORM
+- PostgreSQL 15
+- Docker/Podman
 
-## 📋 Pré-requisitos
+## Pre-requisitos
 
-- Node.js (versão 20 ou superior)
-- npm ou yarn
-- Podman (opcional, para execução em contêiner)
+- Node.js (versao 20 ou superior)
+- npm
+- Docker ou Podman (para o banco de dados)
 
-## 🔧 Instalação
+## Instalacao
 
-1. Clone o repositório
-2. Instale as dependências:
+1. Clone o repositorio
+
+2. Instale as dependencias:
 
 ```bash
 npm install
 ```
 
-3. Copie o arquivo de exemplo das variáveis de ambiente:
+3. Copie o arquivo de variaveis de ambiente:
 
 ```bash
-cp .env.example .env
+cp env.template .env
 ```
 
-4. Configure as variáveis de ambiente no arquivo `.env`
+4. Configure as variaveis de ambiente no arquivo `.env` se necessario
 
-## 🎮 Comandos
+## Subindo o Banco de Dados
 
-### Desenvolvimento Local
+### Opcao 1: Docker Compose (Recomendado)
 
 ```bash
-# Desenvolvimento (com hot reload)
+# Subir apenas o banco de dados
+docker-compose up db -d
+
+# Verificar se o container esta rodando
+docker ps
+
+# Ver logs do banco
+docker logs community-ecommerce-db
+```
+
+### Opcao 2: Docker manual
+
+```bash
+docker run -d \
+  --name community-ecommerce-db \
+  -e POSTGRES_USER=postgres \
+  -e POSTGRES_PASSWORD=postgres \
+  -e POSTGRES_DB=community_ecommerce \
+  -p 5433:5432 \
+  postgres:15-alpine
+```
+
+### Configuracao do Banco
+
+O banco de dados utiliza as seguintes configuracoes (definidas no `.env`):
+
+```
+DB_HOST=localhost
+DB_PORT=5433
+DB_NAME=community_ecommerce
+DB_USER=postgres
+DB_PASSWORD=postgres
+```
+
+Nota: A porta externa e 5433 para evitar conflitos com outras instalacoes do PostgreSQL.
+
+## Executando a Aplicacao
+
+### Desenvolvimento
+
+```bash
 npm run dev
+```
 
-# Build do projeto
+A aplicacao ira:
+
+1. Conectar ao banco de dados PostgreSQL
+2. Criar/atualizar as tabelas automaticamente
+3. Iniciar o servidor na porta 3001
+
+### Producao
+
+```bash
 npm run build
-
-# Executar versão de produção
 npm start
-
-# Limpar pasta de build
-npm run clean
 ```
 
-### Podman/Docker
+## Acessando o Banco de Dados
+
+Para acessar o banco via terminal:
 
 ```bash
-# Construir imagem
-npm run docker:build
-
-# Executar contêiner
-npm run docker:run
-
-# Modo desenvolvimento (com hot-reload)
-npm run docker:dev
-
-# Ver logs
-npm run docker:logs
-
-# Parar contêiner
-npm run docker:stop
+docker exec -it community-ecommerce-db psql -U postgres -d community_ecommerce
 ```
 
-### Podman Compose
+Comandos uteis dentro do psql:
 
-```bash
-# Iniciar todos os serviços (API + Banco)
-npm run compose:up
+```sql
+-- Listar tabelas
+\dt
 
-# Ver logs em tempo real
-npm run compose:logs
+-- Ver estrutura de uma tabela
+\d users
 
-# Parar todos os serviços
-npm run compose:down
+-- Consultar dados
+SELECT * FROM users;
+SELECT * FROM stores;
+SELECT * FROM products;
+SELECT * FROM orders;
+
+-- Sair
+\q
 ```
 
-## 🐳 Executando com Podman
-
-Para instruções detalhadas sobre como usar Podman, consulte:
-
-- **[QUICK_START.md](./QUICK_START.md)** - Guia rápido (recomendado)
-- **[PODMAN_GUIDE.md](./PODMAN_GUIDE.md)** - Documentação completa
-
-### Início Rápido
-
-```bash
-# 1. Construir e executar com Compose (recomendado)
-npm run compose:up
-
-# 2. Ou construir e executar manualmente
-npm run docker:build
-npm run docker:run
-```
-
-## 📁 Estrutura do Projeto
+## Estrutura do Projeto
 
 ```
 community-ecommerce/
 ├── src/
-│   ├── entities/         # Entidades do domínio (4 principais)
-│   │   ├── User.ts      # Usuários
-│   │   ├── Store.ts     # Lojas
-│   │   ├── Product.ts   # Produtos
-│   │   └── Order.ts     # Pedidos
-│   ├── repositories/    # Camada de acesso aos dados
-│   │   ├── BaseRepository.ts
-│   │   ├── UserRepository.ts
-│   │   ├── StoreRepository.ts
-│   │   ├── ProductRepository.ts
-│   │   └── OrderRepository.ts
-│   ├── services/        # Lógica de negócio
-│   │   ├── UserService.ts
-│   │   ├── StoreService.ts
-│   │   ├── ProductService.ts
-│   │   └── OrderService.ts
-│   ├── controllers/     # Controladores (API)
-│   │   ├── UserController.ts
-│   │   ├── StoreController.ts
-│   │   ├── ProductController.ts
-│   │   └── OrderController.ts
-│   └── index.ts        # Arquivo principal
-├── dist/               # Código compilado
-├── tsconfig.json       # Configuração TypeScript
-└── package.json        # Dependências
+│   ├── controllers/      # Controladores (entrada de requisicoes)
+│   ├── services/         # Logica de negocio
+│   ├── repositories/     # Acesso a dados
+│   ├── models/           # Interfaces TypeScript
+│   ├── database/         # Configuracao e modelos Sequelize
+│   │   ├── config.ts     # Configuracao de conexao
+│   │   └── models/       # Modelos ORM
+│   ├── routes.ts         # Definicao de rotas
+│   └── index.ts          # Ponto de entrada
+├── docker-compose.yml    # Orquestracao de containers
+├── package.json          # Dependencias
+├── tsconfig.json         # Configuracao TypeScript
+└── env.template          # Template de variaveis de ambiente
 ```
 
-## 🏪 Arquitetura do Sistema
+## Entidades
 
-### 📦 4 Entidades Principais
+O sistema possui 4 entidades principais:
 
-1. **User** - Usuários do sistema (Cliente, Admin, Dono de Loja)
-2. **Store** - Lojas do comércio local
-3. **Product** - Produtos das lojas
-4. **Order** - Pedidos dos clientes
+- **User**: Usuarios do sistema (CLIENT, ADMIN, STORE_OWNER)
+- **Store**: Lojas cadastradas
+- **Product**: Produtos das lojas
+- **Order**: Pedidos dos clientes
 
-### 🏗️ Camadas da Aplicação
+## Endpoints da API
 
-**Controllers** → **Services** → **Repositories** → **Database**
+### Users
 
-- **Controllers**: Recebem requisições e retornam respostas
-- **Services**: Contêm a lógica de negócio
-- **Repositories**: Acessam e manipulam dados do banco
-- **Entities**: Definem a estrutura dos dados
+| Metodo | Endpoint     | Descricao                    |
+| ------ | ------------ | ---------------------------- |
+| POST   | /users       | Cria um novo usuario         |
+| GET    | /users/:id   | Retorna um usuario pelo ID   |
+| PUT    | /users/:id   | Atualiza dados de um usuario |
+| DELETE | /users/:id   | Remove um usuario            |
+| POST   | /users/login | Autentica um usuario         |
 
-## 🛠️ Desenvolvimento
+### Stores
 
-O projeto segue o padrão de arquitetura em camadas para facilitar manutenção e testes:
+| Metodo | Endpoint               | Descricao                                 |
+| ------ | ---------------------- | ----------------------------------------- |
+| POST   | /stores                | Cria uma nova loja                        |
+| GET    | /stores/:id            | Retorna uma loja pelo ID                  |
+| GET    | /stores/owner/:ownerId | Retorna lojas de um proprietario          |
+| GET    | /stores/nearby         | Busca lojas proximas (lat, lng, radiusKm) |
+| PUT    | /stores/:id            | Atualiza dados de uma loja                |
+| POST   | /stores/:id/approve    | Aprova uma loja pendente                  |
 
-```typescript
-// Exemplo de uso
-const userController = new UserController()
-const user = await userController.create({
-  email: 'user@example.com',
-  password: '123456',
-  name: 'João Silva',
-  phone: '11999999999',
-})
+### Products
+
+| Metodo | Endpoint                 | Descricao                    |
+| ------ | ------------------------ | ---------------------------- |
+| POST   | /products                | Cria um novo produto         |
+| GET    | /products/:id            | Retorna um produto pelo ID   |
+| GET    | /products/store/:storeId | Retorna produtos de uma loja |
+| GET    | /products?q=termo        | Busca produtos por nome      |
+| PUT    | /products/:id            | Atualiza dados de um produto |
+| DELETE | /products/:id            | Remove um produto            |
+
+### Orders
+
+| Metodo | Endpoint               | Descricao                     |
+| ------ | ---------------------- | ----------------------------- |
+| POST   | /orders                | Cria um novo pedido           |
+| GET    | /orders/:id            | Retorna um pedido pelo ID     |
+| GET    | /orders/user/:userId   | Retorna pedidos de um usuario |
+| GET    | /orders/store/:storeId | Retorna pedidos de uma loja   |
+| POST   | /orders/:id/confirm    | Confirma um pedido            |
+| POST   | /orders/:id/cancel     | Cancela um pedido             |
+
+## Exemplos de Uso
+
+### Criar usuario
+
+```bash
+curl -X POST http://localhost:3001/users \
+  -H "Content-Type: application/json" \
+  -d '{
+    "email": "usuario@email.com",
+    "password": "123456",
+    "name": "Nome do Usuario",
+    "phone": "11999999999",
+    "role": "CLIENT"
+  }'
 ```
 
-### Próximos Passos
+### Criar loja
 
-1. Conectar banco de dados (PostgreSQL, MySQL ou MongoDB)
-2. Implementar rotas REST com Express
-3. Adicionar autenticação JWT
-4. Criar validações com Zod ou Yup
+```bash
+curl -X POST http://localhost:3001/stores \
+  -H "Content-Type: application/json" \
+  -d '{
+    "ownerId": "ID_DO_USUARIO",
+    "name": "Nome da Loja",
+    "slug": "nome-da-loja",
+    "description": "Descricao da loja",
+    "phone": "11988888888",
+    "email": "loja@email.com",
+    "address": "Endereco completo",
+    "city": "Cidade",
+    "state": "SP",
+    "deliveryFee": 5.00
+  }'
+```
+
+### Criar produto
+
+```bash
+curl -X POST http://localhost:3001/products \
+  -H "Content-Type: application/json" \
+  -d '{
+    "storeId": "ID_DA_LOJA",
+    "name": "Nome do Produto",
+    "description": "Descricao do produto",
+    "price": 29.90,
+    "stock": 100
+  }'
+```
+
+## Scripts Disponiveis
+
+| Script        | Descricao                                      |
+| ------------- | ---------------------------------------------- |
+| npm run dev   | Executa em modo desenvolvimento com hot-reload |
+| npm run build | Compila o TypeScript                           |
+| npm start     | Executa a versao compilada                     |
+| npm run clean | Remove a pasta dist                            |
+
+## Arquitetura
+
+O projeto segue arquitetura em camadas:
+
+```
+Routes -> Controllers -> Services -> Repositories -> Database
+```
+
+- **Routes**: Define os endpoints HTTP
+- **Controllers**: Recebe requisicoes, valida entrada, retorna respostas
+- **Services**: Contem a logica de negocio
+- **Repositories**: Acessa e manipula dados do banco
+- **Models**: Define interfaces e modelos ORM
