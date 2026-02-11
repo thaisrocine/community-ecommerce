@@ -1,6 +1,7 @@
 import { ReviewRepository } from '../repositories/ReviewRepository'
 import { OrderRepository } from '../repositories/OrderRepository'
 import { StoreRepository } from '../repositories/StoreRepository'
+import { UserRepository } from '../repositories/UserRepository'
 import { Review, ReviewStatus, ReviewStats } from '../models/Review'
 import { OrderStatus } from '../models/Order'
 
@@ -8,11 +9,13 @@ export class ReviewService {
   private reviewRepository: ReviewRepository
   private orderRepository: OrderRepository
   private storeRepository: StoreRepository
+  private userRepository: UserRepository
 
   constructor() {
     this.reviewRepository = new ReviewRepository()
     this.orderRepository = new OrderRepository()
     this.storeRepository = new StoreRepository()
+    this.userRepository = new UserRepository()
   }
 
   async createReview(data: Partial<Review>): Promise<Review> {
@@ -22,6 +25,12 @@ export class ReviewService {
 
     if (data.rating < 1 || data.rating > 5) {
       throw new Error('A nota deve ser entre 1 e 5')
+    }
+
+    // Busca o usuário para pegar o nome
+    const user = await this.userRepository.findById(data.userId)
+    if (!user) {
+      throw new Error('Usuário não encontrado')
     }
 
     const store = await this.storeRepository.findById(data.storeId)
@@ -59,6 +68,7 @@ export class ReviewService {
 
     const reviewData: Partial<Review> = {
       ...data,
+      userName: user.name, // Preenche automaticamente com o nome do usuário
       title: data.title || '',
       helpful: 0,
       notHelpful: 0,
@@ -204,4 +214,5 @@ export class ReviewService {
     return deliveredOrders.length > 0
   }
 }
+
 

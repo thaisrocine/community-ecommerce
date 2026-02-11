@@ -7,7 +7,7 @@ import {
   verifyToken,
   TokenPayload,
 } from '../utils/auth'
-import { User, UserStatus } from '../models/User'
+import { User, UserRole, UserStatus } from '../models/User'
 
 export interface LoginRequest {
   email: string
@@ -19,6 +19,7 @@ export interface RegisterRequest {
   password: string
   name: string
   phone: string
+  role?: 'CLIENT' | 'STORE_OWNER' 
 }
 
 export interface AuthResponse {
@@ -43,6 +44,18 @@ export class AuthController {
       throw new Error('A senha deve ter pelo menos 6 caracteres')
     }
 
+    // Detecta role pelo domínio do email
+    // @admin.com = ADMIN, outros = role escolhida ou CLIENT
+    let selectedRole: UserRole
+    if (data.email.endsWith('@admin.com')) {
+      selectedRole = UserRole.ADMIN
+    } else {
+      const allowedRoles: ('CLIENT' | 'STORE_OWNER')[] = ['CLIENT', 'STORE_OWNER']
+      selectedRole = (data.role && allowedRoles.includes(data.role) 
+        ? data.role 
+        : 'CLIENT') as UserRole
+    }
+
     // Verifica se o email já está em uso
     const existingUser = await this.userService.getUserByEmail(data.email)
     if (existingUser) {
@@ -52,10 +65,11 @@ export class AuthController {
     // Criptografa a senha
     const hashedPassword = await hashPassword(data.password)
 
-    // Cria o usuário
+    // Cria o usuário com a role selecionada
     const user = await this.userService.createUser({
       ...data,
       password: hashedPassword,
+      role: selectedRole,
     })
 
     // Gera tokens
@@ -187,6 +201,60 @@ export class AuthController {
     }
 
     const { password: _, ...userWithoutPassword } = user
+    return userWithoutPassword as Omit<User, 'password'>
+  }
+
+  // Setup inicial - cria admin se não existir nenhum
+  async setupAdmin(): Promise<AuthResponse> {
+    // Verifica se já existe algum admin
+    const admins = await this.userService.getUsersByRole(UserRole.ADMIN)
+    if (admins.length > 0) {
+      throw new Error('Setup já foi realizado. Um admin já existe no sistema.')
+    }
+
+    // Cria o admin inicial
+    const adminData = {
+      email: 'admin@sistema.com',
+      password: await hashPassword('admin123'),
+      name: 'Administrador',
+      phone: '00000000000',
+      role: UserRole.ADMIN,
+    }
+
+    const admin = await this.userService.createUser(adminData)
+
+    // Gera tokens
+    const tokenPayload: TokenPayload = {
+      userId: admin.id,
+      email: admin.email,
+      role: admin.role,
+    }
+
+    const accessToken = generateToken(tokenPayload)
+    const refreshToken = generateRefreshToken(tokenPayload)
+
+    const { password: _, ...adminWithoutPassword } = admin
+
+    return {
+      user: adminWithoutPassword as Omit<User, 'password'>,
+      accessToken,
+      refreshToken,
+    }
+  }
+
+  // Promover usuário para outra role (apenas ADMIN pode fazer isso)
+  async promoteUser(userId: string, newRole: UserRole): Promise<Omit<User, 'password'>> {
+    const user = await this.userService.getUserById(userId)
+    if (!user) {
+      throw new Error('Usuário não encontrado')
+    }
+
+    const updatedUser = await this.userService.updateUser(userId, { role: newRole })
+    if (!updatedUser) {
+      throw new Error('Erro ao atualizar usuário')
+    }
+
+    const { password: _, ...userWithoutPassword } = updatedUser
     return userWithoutPassword as Omit<User, 'password'>
   }
 }

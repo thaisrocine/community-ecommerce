@@ -71,6 +71,33 @@ router.post('/auth/change-password', authenticate, async (req: Request, res: Res
   }
 })
 
+// Setup inicial - cria o primeiro admin automaticamente
+router.post('/auth/setup', async (_req: Request, res: Response) => {
+  try {
+    const result = await authCtrl.setupAdmin()
+    return res.status(201).json({
+      message: 'Admin criado com sucesso! Email: admin@sistema.com, Senha: admin123',
+      ...result
+    })
+  } catch (err: any) {
+    return res.status(400).json({ error: err.message || String(err) })
+  }
+})
+
+// Promover usuário (apenas ADMIN)
+router.put('/users/:id/promote', authenticate, authorize(UserRole.ADMIN), async (req: Request, res: Response) => {
+  try {
+    const { role } = req.body
+    if (!role || !['CLIENT', 'STORE_OWNER', 'ADMIN'].includes(role)) {
+      return res.status(400).json({ error: 'Role inválida. Use: CLIENT, STORE_OWNER ou ADMIN' })
+    }
+    const result = await authCtrl.promoteUser(req.params.id, role as UserRole)
+    return res.status(200).json(result)
+  } catch (err: any) {
+    return res.status(400).json({ error: err.message || String(err) })
+  }
+})
+
 // Users
 router.post('/users', async (req: Request, res: Response) => {
   try {
@@ -132,11 +159,14 @@ router.post('/stores', authenticate, authorize(UserRole.STORE_OWNER, UserRole.AD
   }
 })
 
-router.get('/stores/:id', async (req: Request, res: Response) => {
+// IMPORTANTE: Rotas específicas ANTES de rotas com :id
+router.get('/stores/nearby', async (req: Request, res: Response) => {
   try {
-    const store = await storeCtrl.getById(req.params.id)
-    if (!store) return res.status(404).json({ error: 'Store not found' })
-    res.json(store)
+    const lat = Number(req.query.lat)
+    const lng = Number(req.query.lng)
+    const radius = Number(req.query.radiusKm) || Number(req.query.radius) || 5
+    const stores = await storeCtrl.getNearby(lat, lng, radius)
+    res.json(stores)
   } catch (err: any) {
     res.status(500).json({ error: err.message || String(err) })
   }
@@ -151,13 +181,12 @@ router.get('/stores/owner/:ownerId', async (req: Request, res: Response) => {
   }
 })
 
-router.get('/stores/nearby', async (req: Request, res: Response) => {
+// Rota com :id deve vir DEPOIS das rotas específicas
+router.get('/stores/:id', async (req: Request, res: Response) => {
   try {
-    const lat = Number(req.query.lat)
-    const lng = Number(req.query.lng)
-    const radius = Number(req.query.radiusKm) || Number(req.query.radius) || 5
-    const stores = await storeCtrl.getNearby(lat, lng, radius)
-    res.json(stores)
+    const store = await storeCtrl.getById(req.params.id)
+    if (!store) return res.status(404).json({ error: 'Store not found' })
+    res.json(store)
   } catch (err: any) {
     res.status(500).json({ error: err.message || String(err) })
   }

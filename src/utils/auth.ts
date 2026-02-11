@@ -55,3 +55,4 @@ export const generateRefreshToken = (payload: TokenPayload): string => {
   return jwt.sign(payload, JWT_SECRET, { expiresIn: '30d' })
 }
 
+

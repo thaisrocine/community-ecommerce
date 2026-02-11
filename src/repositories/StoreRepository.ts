@@ -68,38 +68,34 @@ export class StoreRepository implements IStoreRepository {
     longitude: number,
     radiusKm: number
   ): Promise<Store[]> {
+    // Fórmula de Haversine para calcular distância
+    const haversineFormula = `(
+      6371 * acos(
+        LEAST(1, GREATEST(-1,
+          cos(radians(${latitude})) * 
+          cos(radians(CAST(latitude AS FLOAT))) * 
+          cos(radians(CAST(longitude AS FLOAT)) - radians(${longitude})) + 
+          sin(radians(${latitude})) * 
+          sin(radians(CAST(latitude AS FLOAT)))
+        ))
+      )
+    )`
+
     const results = await StoreModel.findAll({
       where: {
         latitude: { [Op.ne]: null },
         longitude: { [Op.ne]: null },
         status: StoreStatus.ACTIVE,
+        [Op.and]: [
+          literal(`${haversineFormula} <= ${radiusKm}`)
+        ]
       } as any,
       attributes: {
         include: [
-          [
-            literal(`(
-              6371 * acos(
-                cos(radians(${latitude})) * 
-                cos(radians(latitude)) * 
-                cos(radians(longitude) - radians(${longitude})) + 
-                sin(radians(${latitude})) * 
-                sin(radians(latitude))
-              )
-            )`),
-            'distance',
-          ],
+          [literal(haversineFormula), 'distance'],
         ],
       },
-      having: literal(`(
-        6371 * acos(
-          cos(radians(${latitude})) * 
-          cos(radians(latitude)) * 
-          cos(radians(longitude) - radians(${longitude})) + 
-          sin(radians(${latitude})) * 
-          sin(radians(latitude))
-        )
-      ) <= ${radiusKm}`),
-      order: [[literal('distance'), 'ASC']],
+      order: [[literal(haversineFormula), 'ASC']],
     })
 
     return results.map((result) => result.toJSON() as Store)
