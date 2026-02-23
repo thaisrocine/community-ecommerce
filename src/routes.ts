@@ -112,9 +112,9 @@ router.get('/users/:id', async (req: Request, res: Response) => {
   try {
     const user = await userCtrl.getById(req.params.id)
     if (!user) return res.status(404).json({ error: 'User not found' })
-    res.json(user)
+    return res.json(user)
   } catch (err: any) {
-    res.status(500).json({ error: err.message || String(err) })
+    return res.status(500).json({ error: err.message || String(err) })
   }
 })
 
@@ -122,9 +122,9 @@ router.put('/users/:id', async (req: Request, res: Response) => {
   try {
     const updated = await userCtrl.update(req.params.id, req.body)
     if (!updated) return res.status(404).json({ error: 'User not found' })
-    res.json(updated)
+    return res.json(updated)
   } catch (err: any) {
-    res.status(500).json({ error: err.message || String(err) })
+    return res.status(500).json({ error: err.message || String(err) })
   }
 })
 
@@ -132,9 +132,9 @@ router.delete('/users/:id', async (req: Request, res: Response) => {
   try {
     const ok = await userCtrl.delete(req.params.id)
     if (!ok) return res.status(404).json({ error: 'User not found' })
-    res.status(204).send()
+    return res.status(204).send()
   } catch (err: any) {
-    res.status(500).json({ error: err.message || String(err) })
+    return res.status(500).json({ error: err.message || String(err) })
   }
 })
 
@@ -143,9 +143,9 @@ router.post('/users/login', async (req: Request, res: Response) => {
     const { email, password } = req.body
     const user = await userCtrl.login(email, password)
     if (!user) return res.status(401).json({ error: 'Invalid credentials' })
-    res.json(user)
+    return res.json(user)
   } catch (err: any) {
-    res.status(500).json({ error: err.message || String(err) })
+    return res.status(500).json({ error: err.message || String(err) })
   }
 })
 
@@ -186,9 +186,9 @@ router.get('/stores/:id', async (req: Request, res: Response) => {
   try {
     const store = await storeCtrl.getById(req.params.id)
     if (!store) return res.status(404).json({ error: 'Store not found' })
-    res.json(store)
+    return res.json(store)
   } catch (err: any) {
-    res.status(500).json({ error: err.message || String(err) })
+    return res.status(500).json({ error: err.message || String(err) })
   }
 })
 
@@ -228,9 +228,9 @@ router.get('/products/:id', async (req: Request, res: Response) => {
   try {
     const p = await productCtrl.getById(req.params.id)
     if (!p) return res.status(404).json({ error: 'Product not found' })
-    res.json(p)
+    return res.json(p)
   } catch (err: any) {
-    res.status(500).json({ error: err.message || String(err) })
+    return res.status(500).json({ error: err.message || String(err) })
   }
 })
 
@@ -250,9 +250,9 @@ router.get('/products', async (req: Request, res: Response) => {
       const list = await productCtrl.search(q)
       return res.json(list)
     }
-    res.json([])
+    return res.json([])
   } catch (err: any) {
-    res.status(500).json({ error: err.message || String(err) })
+    return res.status(500).json({ error: err.message || String(err) })
   }
 })
 
@@ -260,9 +260,9 @@ router.put('/products/:id', async (req: Request, res: Response) => {
   try {
     const updated = await productCtrl.update(req.params.id, req.body)
     if (!updated) return res.status(404).json({ error: 'Product not found' })
-    res.json(updated)
+    return res.json(updated)
   } catch (err: any) {
-    res.status(500).json({ error: err.message || String(err) })
+    return res.status(500).json({ error: err.message || String(err) })
   }
 })
 
