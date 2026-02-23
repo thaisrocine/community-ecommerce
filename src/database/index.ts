@@ -1,5 +1,11 @@
 import sequelize from './config'
-import { UserModel, StoreModel, ProductModel, OrderModel } from './models'
+import {
+  UserModel,
+  StoreModel,
+  ProductModel,
+  OrderModel,
+  ReviewModel,
+} from './models'
 
 export async function initializeDatabase(): Promise<void> {
   try {
@@ -27,4 +33,4 @@ export async function closeDatabase(): Promise<void> {
   }
 }
 
-export { sequelize, UserModel, StoreModel, ProductModel, OrderModel }
+export { sequelize, UserModel, StoreModel, ProductModel, OrderModel, ReviewModel }
