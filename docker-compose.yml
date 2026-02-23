@@ -7,6 +7,12 @@ services:
     environment:
       - NODE_ENV=development
       - PORT=3000
+      - DB_HOST=db
+      - DB_PORT=5432
+      - DB_NAME=community_ecommerce
+      - DB_USER=postgres
+      - DB_PASSWORD=postgres
+      - JWT_SECRET=your-super-secret-key-change-in-production
     volumes:
       - ./src:/app/src
     command: npm run dev
