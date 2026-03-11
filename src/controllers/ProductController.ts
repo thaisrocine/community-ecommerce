@@ -33,6 +33,14 @@ export class ProductController {
     }
   }
 
+  async getAll(): Promise<Product[]> {
+    try {
+      return await this.productService.getAllProducts()
+    } catch (error) {
+      throw new Error(`Erro ao listar produtos: ${error}`)
+    }
+  }
+
   async getById(id: string): Promise<Product | null> {
     try {
       return await this.productService.getProductById(id)

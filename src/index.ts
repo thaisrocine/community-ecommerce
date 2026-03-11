@@ -12,6 +12,23 @@ async function main(): Promise<void> {
   await initializeDatabase()
 
   const app = express()
+
+  // CORS - permite requisições do frontend
+  app.use((_req, res, next) => {
+    const origin = _req.headers.origin
+    const allowed = ['http://localhost:3000', 'http://localhost:3001']
+    if (origin && allowed.includes(origin)) {
+      res.setHeader('Access-Control-Allow-Origin', origin)
+    }
+    res.setHeader('Access-Control-Allow-Methods', 'GET,POST,PUT,DELETE,OPTIONS')
+    res.setHeader('Access-Control-Allow-Headers', 'Content-Type,Authorization')
+    if (_req.method === 'OPTIONS') {
+      res.status(204).end()
+      return
+    }
+    next()
+  })
+
   app.use(express.json())
 
   app.use('/', routes)

@@ -20,12 +20,16 @@ export class ProductService {
     const productData: Partial<Product> = {
       ...data,
       status: data.status || ProductStatus.ACTIVE,
-      stock: data.stock || 0,
+      stock: data.stock ?? 0,
       createdAt: new Date(),
       updatedAt: new Date(),
     }
 
     return await this.productRepository.create(productData)
+  }
+
+  async getAllProducts(): Promise<Product[]> {
+    return await this.productRepository.findAll({ status: ProductStatus.ACTIVE })
   }
 
   async getProductById(id: string): Promise<Product | null> {

@@ -8,6 +8,10 @@ export class StoreService {
     this.storeRepository = new StoreRepository()
   }
 
+  async getAllStores(): Promise<Store[]> {
+    return await this.storeRepository.findAll({ status: StoreStatus.ACTIVE })
+  }
+
   async createStore(data: Partial<Store>): Promise<Store> {
     if (!data.name || !data.ownerId) {
       throw new Error('Nome e proprietário são obrigatórios')
@@ -24,7 +28,7 @@ export class StoreService {
 
     const storeData: Partial<Store> = {
       ...data,
-      status: data.status || StoreStatus.PENDING_APPROVAL,
+      status: data.status || StoreStatus.ACTIVE,
       createdAt: new Date(),
       updatedAt: new Date(),
     }

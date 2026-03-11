@@ -73,7 +73,7 @@ export class ReviewService {
       helpful: 0,
       notHelpful: 0,
       verified,
-      status: ReviewStatus.PENDING,
+      status: ReviewStatus.APPROVED,
       createdAt: new Date(),
       updatedAt: new Date(),
     }

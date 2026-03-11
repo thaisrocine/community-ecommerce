@@ -150,6 +150,15 @@ router.post('/users/login', async (req: Request, res: Response) => {
 })
 
 // Stores
+router.get('/stores', async (_req: Request, res: Response) => {
+  try {
+    const stores = await storeCtrl.getAll()
+    return res.json(stores)
+  } catch (err: any) {
+    return res.status(500).json({ error: err.message || String(err) })
+  }
+})
+
 router.post('/stores', authenticate, authorize(UserRole.STORE_OWNER, UserRole.ADMIN), async (req: Request, res: Response) => {
   try {
     const store = await storeCtrl.create({ ...req.body, ownerId: req.user!.userId })
@@ -250,7 +259,8 @@ router.get('/products', async (req: Request, res: Response) => {
       const list = await productCtrl.search(q)
       return res.json(list)
     }
-    return res.json([])
+    const all = await productCtrl.getAll()
+    return res.json(all)
   } catch (err: any) {
     return res.status(500).json({ error: err.message || String(err) })
   }
