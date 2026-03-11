@@ -31,6 +31,14 @@ export class StoreController {
     this.storeService = new StoreService()
   }
 
+  async getAll(): Promise<Store[]> {
+    try {
+      return await this.storeService.getAllStores()
+    } catch (error) {
+      throw new Error(`Erro ao listar lojas: ${error}`)
+    }
+  }
+
   async create(data: CreateStoreRequest): Promise<Store> {
     try {
       return await this.storeService.createStore(data)
